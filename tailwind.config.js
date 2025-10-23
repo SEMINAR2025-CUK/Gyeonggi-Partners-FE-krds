@@ -1,5 +1,7 @@
+// @ts-nocheck
 /** @type {import('tailwindcss').Config} */
 import defaultTheme from 'tailwindcss/defaultTheme'
+import krdsPlugin from '@krds-ui/tailwindcss-plugin'; // ts-check 건너뜀 -> 이미 빌드된 패키지이기 때문
 
 export default {
   content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
@@ -140,5 +142,6 @@ export default {
       },
     },
   },
-  plugins: [],
+  plugins: [krdsPlugin],
+  //  plugins: [],
 }
