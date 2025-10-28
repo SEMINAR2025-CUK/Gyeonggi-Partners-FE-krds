@@ -1,4 +1,5 @@
 import Typography from './components/Typography'
+import { Footer } from './components/Footer'
 import { Button } from '@krds-ui/core'
 
 export default function App() {
@@ -13,6 +14,7 @@ export default function App() {
       >
         버튼: Primary
       </Button>
+      <Footer />
     </>
   )
 }
