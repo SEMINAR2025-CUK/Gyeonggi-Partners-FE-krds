@@ -1,6 +1,7 @@
 import Typography from './components/Typography'
 import { Footer } from './components/Footer'
 import { Button } from '@krds-ui/core'
+import { MainBanner } from './components/MainBanner'
 
 export default function App() {
   return (
@@ -8,12 +9,12 @@ export default function App() {
       <Typography variant="display" size="large">
         대한민국 전자정부 사이트 예제입니다.
       </Typography>
-      <Button
-        onClick={function ra(){}}
-        variant="primary"
-      >
+      <Button onClick={function ra() {}} variant="primary">
         버튼: Primary
       </Button>
+      <main>
+        <MainBanner />
+      </main>
       <Footer />
     </>
   )
