@@ -1,4 +1,5 @@
 import Typography from './components/Typography'
+import { Footer } from './components/Footer'
 import { Button } from '@krds-ui/core'
 import { MainBanner } from './components/MainBanner'
 
@@ -14,6 +15,7 @@ export default function App() {
       <main>
         <MainBanner />
       </main>
+      <Footer />
     </>
   )
 }
