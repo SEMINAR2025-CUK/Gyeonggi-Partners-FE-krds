@@ -37,6 +37,7 @@
     "react-dom": "^18.3.1"
   },
   "dependencies": {
+    "@chatscope/chat-ui-kit-react": "^2.1.1",
     "@krds-ui/core": "^0.6.0",
     "@krds-ui/tailwindcss-plugin": "^0.6.0",
     "lucide-react": "^0.548.0",
