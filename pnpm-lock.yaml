@@ -11,6 +11,9 @@ importers:
       '@chatscope/chat-ui-kit-react':
         specifier: ^2.1.1
         version: 2.1.1(prop-types@15.8.1)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
+      '@chatscope/chat-ui-kit-styles':
+        specifier: ^1.4.0
+        version: 1.4.0
       '@krds-ui/core':
         specifier: ^0.6.0
         version: 0.6.0(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
