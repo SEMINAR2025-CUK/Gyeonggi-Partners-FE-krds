@@ -14,6 +14,9 @@ export default defineConfig({
       insertTypesEntry: true,
     }),
   ],
+  define: {
+    global: 'globalThis',
+  },
   build: {
     lib: {
       entry: resolve(__dirname, 'src/index.ts'),
