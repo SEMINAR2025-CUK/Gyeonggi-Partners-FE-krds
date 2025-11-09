@@ -41,7 +41,8 @@
     "@krds-ui/tailwindcss-plugin": "^0.6.0",
     "lucide-react": "^0.548.0",
     "react": "^19.2.0",
-    "react-dom": "^19.2.0"
+    "react-dom": "^19.2.0",
+    "react-router-dom": "^7.9.5"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^6.9.1",
