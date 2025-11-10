@@ -59,7 +59,7 @@ export function Header({
                     size="s"
                     weight="regular"
                     color="gray-60"
-                    href="/login"
+                    href="/signin"
                     title="로그인"
                     className="no-underline inline-flex items-center h-6 leading-none cursor-pointer hover:text-primary-50"
                   >
