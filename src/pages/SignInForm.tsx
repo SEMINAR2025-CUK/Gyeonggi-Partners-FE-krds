@@ -33,9 +33,20 @@ function KRDSCard({
 
 // 서버에서 내려주는 응답 중 자주 쓰이는 필드들을 정리한 타입
 // (message, error  중 하나라도 포함하면 ApiMessage로 봄)
+type LoginResponseData = {
+  "userId": number,
+  "nickname": "string",
+  "email": "string",
+  "role": "string",
+  "grantType": "string",
+  "accessToken": "string",
+  "refreshToken": "string"
+}
+
 type ApiMessage = {
   message?: string;
   error?: string;
+  data?: LoginResponseData;
 };
 
 // 값이 객체 형태인지 확인하는 유틸 (null 제외)
@@ -109,16 +120,29 @@ export default function SignInForm({ onLoginSuccess }: SignInFormProps) {
       // 응답을 안전하게 JSON으로 파싱
       const parsed = await parseJsonSafe(res);
       // 우리가 정의한 ApiMessage 형태인지 확인
-      const data: ApiMessage | null = isApiMessage(parsed) ? (parsed as ApiMessage) : null;
+      const resJSON: ApiMessage | null = isApiMessage(parsed) ? (parsed as ApiMessage) : null;
+
+
 
       // HTTP 상태 코드가 200이 아닐 때
       if (!res.ok) {
-        setMsg(data?.message || data?.error || `로그인 실패 (${res.status})`);
+        setMsg(resJSON?.message || resJSON?.error || `로그인 실패 (${res.status})`);
         return;
       }
 
       // 성공 메시지 띄우고 콜백/페이지 이동
       setMsg("로그인 성공!");
+
+      // ----------추후 리팩토링 필요----------
+      if (resJSON?.data == null) {
+        setMsg("로그인 응답 데이터가 올바르지 않습니다.");
+        return;
+      }
+
+      sessionStorage.setItem("accessToken", resJSON.data.accessToken);
+      sessionStorage.setItem("refreshToken", resJSON.data.refreshToken);
+      // ----------------
+
       onLoginSuccess?.(); // 콜백이 있으면 실행
       navigate("/", { replace: true }); // 메인 페이지로 이동
     } catch {

@@ -19,7 +19,7 @@ export function Header({
 }: HeaderProps) {
   const navItems = [
     { key: 'main', label: '홈' },
-    { key: 'discussions', label: '솔루션 토의실' },
+    { key: 'solutionforum', label: '솔루션 토의실' },
     { key: 'proposals', label: '진행중인 제안' },
     { key: 'completed', label: '완료된 프로젝트' },
     { key: 'guide', label: '가이드' },
@@ -284,7 +284,7 @@ export function Header({
                   size="s"
                   weight="regular"
                   color="gray-0"
-                  href="#"
+                  href={`/${key === 'main' ? '' : key}`}
                   title={label}
                   aria-current={active ? 'page' : undefined}
                   className={[
