@@ -14,6 +14,8 @@ import { JoinRoomModal } from './discussion/JoinRoomModal';
 import { ChatArea } from './discussion/ChatArea';
 import { ProposalPanel } from './discussion/ProposalPanel';
 import { ProposalEditor } from './ProposalEditor';
+import { ParticipantsList } from './discussion/ParticipantsList';
+import { ProposalViewer } from './discussion/ProposalViewer';
 
 interface GroupChatRoomProps {
   selectedRoom: DiscussionRoomType | null;
@@ -27,6 +29,7 @@ export const GroupChatRoom = ({ selectedRoom, isModalOpen, onClose }: GroupChatR
   const { roomDetails, messages, isLoading, sendMessage, leaveRoom } = useDiscussionRoom(currentRoomId);
   const [inputMessage, setInputMessage] = useState('');
   const [isEditorOpen, setIsEditorOpen] = useState(false);
+  const [isViewerOpen, setIsViewerOpen] = useState(false);
 
   // Handle join room
   const handleJoinRoom = async () => {
@@ -158,26 +161,43 @@ export const GroupChatRoom = ({ selectedRoom, isModalOpen, onClose }: GroupChatR
 
     // Main Chat Room Layout
     return (
-      <div className="flex h-screen">
-        {/* Chat Section - 2/3 width */}
-        <ChatArea
-          roomDetails={roomDetails}
-          messages={messages}
-          inputMessage={inputMessage}
-          onInputChange={setInputMessage}
-          onSendMessage={handleSendMessage}
-          onBack={handleBack}
-          onLeaveRoom={handleLeaveRoom}
-        />
+      <>
+        <div className="flex h-screen">
+          {/* Participants List - 20% width */}
+          <div className="hidden lg:block" style={{ width: '20%', minWidth: '200px' }}>
+            <ParticipantsList participants={roomDetails.participants} />
+          </div>
 
-        {/* Proposal Panel - 1/3 width */}
-        <div className="hidden lg:block" style={{ flexBasis: '33.333%' }}>
-          <ProposalPanel
-            proposal={roomDetails.proposal}
-            onCreateProposal={() => setIsEditorOpen(true)}
-          />
+          {/* Chat Section - 50% width */}
+          <div style={{ flex: '1', minWidth: '400px' }}>
+            <ChatArea
+              roomDetails={roomDetails}
+              messages={messages}
+              inputMessage={inputMessage}
+              onInputChange={setInputMessage}
+              onSendMessage={handleSendMessage}
+              onBack={handleBack}
+              onLeaveRoom={handleLeaveRoom}
+            />
+          </div>
+
+          {/* Proposal Panel - 30% width */}
+          <div className="hidden lg:block" style={{ width: '30%', minWidth: '280px' }}>
+            <ProposalPanel
+              proposal={roomDetails.proposal}
+              onCreateProposal={() => setIsEditorOpen(true)}
+              onViewProposal={() => setIsViewerOpen(true)}
+            />
+          </div>
         </div>
-      </div>
+
+        {/* Proposal Viewer Modal */}
+        <ProposalViewer
+          proposal={roomDetails.proposal || null}
+          isOpen={isViewerOpen}
+          onClose={() => setIsViewerOpen(false)}
+        />
+      </>
     );
   }
 

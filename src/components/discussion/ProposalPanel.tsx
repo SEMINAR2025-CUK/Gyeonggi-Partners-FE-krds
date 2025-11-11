@@ -1,13 +1,14 @@
 import { Button } from '@krds-ui/core';
-import { Plus, FileText } from 'lucide-react';
+import { Plus, FileText, Eye } from 'lucide-react';
 import { Proposal } from '../../types/discussion';
 
 interface ProposalPanelProps {
   proposal?: Proposal;
   onCreateProposal: () => void;
+  onViewProposal?: () => void;
 }
 
-export const ProposalPanel = ({ proposal, onCreateProposal }: ProposalPanelProps) => {
+export const ProposalPanel = ({ proposal, onCreateProposal, onViewProposal }: ProposalPanelProps) => {
   const getStatusBadge = (status: string) => {
     const statusMap: Record<string, { label: string; color: string }> = {
       PENDING_CONSENT: { label: '동의 대기중', color: 'bg-yellow-100 text-yellow-800' },
@@ -46,10 +47,10 @@ export const ProposalPanel = ({ proposal, onCreateProposal }: ProposalPanelProps
         
         {proposal ? (
           <div className="bg-white rounded-lg border border-gray-200 p-4 mb-3">
-            <div className="flex items-start gap-3">
+            <div className="flex items-start gap-3 mb-3">
               <FileText size={20} className="text-blue-600 mt-1 shrink-0" />
               <div className="flex-1 min-w-0">
-                <h4 className="text-sm mb-2 truncate">
+                <h4 className="text-sm font-medium mb-2 truncate">
                   {proposal.title || `제안서 #${proposal.proposalId}`}
                 </h4>
                 <div className="mb-2">
@@ -60,6 +61,20 @@ export const ProposalPanel = ({ proposal, onCreateProposal }: ProposalPanelProps
                 </p>
               </div>
             </div>
+            {onViewProposal && (
+              <Button
+                variant="secondary"
+                size="small"
+                onClick={onViewProposal}
+                className="w-full gap-2"
+                children={
+                  <>
+                    <Eye size={16} />
+                    상세보기
+                  </>
+                }
+              />
+            )}
           </div>
         ) : (
           <div className="text-center py-12 text-gray-400">
