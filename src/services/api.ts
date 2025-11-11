@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { API_CONFIG, MOCK_CONFIG } from '../config/constants';
-import { 
-  DiscussionRoom, 
-  RoomDetails, 
-  ApiResponse, 
+import {
+  DiscussionRoom,
+  RoomDetails,
+  ApiResponse,
   PaginatedResponse,
   Proposal,
   ProposalPayload
@@ -13,6 +13,15 @@ import { mockRooms, getMockRoomDetails } from './mockData';
 
 // Simulated delay for mock API
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
+// Helper function to get auth headers with JWT token
+const getAuthHeaders = (): HeadersInit => {
+  const token = sessionStorage.getItem('accessToken');
+  return {
+    'Content-Type': 'application/json',
+    ...(token && { Authorization: `Bearer ${token}` }),
+  };
+};
 
 // API Service
 export class DiscussionRoomAPI {
@@ -54,7 +63,13 @@ export class DiscussionRoomAPI {
       ...(region && { region }),
     });
 
-    const response = await fetch(`${this.baseUrl}/api/rooms?${params}`);
+    const token = sessionStorage.getItem('accessToken');
+    const response = await fetch(`${this.baseUrl}/api/discussion-rooms/retrieveTotal?${params}`, {
+      credentials: 'include',
+      headers: {
+        ...(token && { Authorization: `Bearer ${token}` }),
+      },
+    });
     return response.json();
   }
 
@@ -84,8 +99,12 @@ export class DiscussionRoomAPI {
       size: size.toString(),
     });
 
-    const response = await fetch(`${this.baseUrl}/api/rooms/my?${params}`, {
-      credentials: 'include', // For auth
+    const token = sessionStorage.getItem('accessToken');
+    const response = await fetch(`${this.baseUrl}/api/discussion-rooms/retrieveMyJoined?${params}`, {
+      credentials: 'include',
+      headers: {
+        ...(token && { Authorization: `Bearer ${token}` }),
+      },
     });
     return response.json();
   }
@@ -117,11 +136,9 @@ export class DiscussionRoomAPI {
     }
 
     // Real API call
-    const response = await fetch(`${this.baseUrl}/api/rooms`, {
+    const response = await fetch(`${this.baseUrl}/api/discussion-rooms/create`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: getAuthHeaders(),
       credentials: 'include',
       body: JSON.stringify(data),
     });
@@ -147,9 +164,13 @@ export class DiscussionRoomAPI {
     }
 
     // Real API call
-    const response = await fetch(`${this.baseUrl}/api/rooms/${roomId}/join`, {
+    const token = sessionStorage.getItem('accessToken');
+    const response = await fetch(`${this.baseUrl}/api/discussion-rooms/${roomId}/join`, {
       method: 'POST',
       credentials: 'include',
+      headers: {
+        ...(token && { Authorization: `Bearer ${token}` }),
+      },
     });
     return response.json();
   }
@@ -167,8 +188,12 @@ export class DiscussionRoomAPI {
     }
 
     // Real API call
-    const response = await fetch(`${this.baseUrl}/api/rooms/${roomId}`, {
+    const token = sessionStorage.getItem('accessToken');
+    const response = await fetch(`${this.baseUrl}/api/discussion-rooms/${roomId}`, {
       credentials: 'include',
+      headers: {
+        ...(token && { Authorization: `Bearer ${token}` }),
+      },
     });
     return response.json();
   }
@@ -186,9 +211,13 @@ export class DiscussionRoomAPI {
     }
 
     // Real API call
-    const response = await fetch(`${this.baseUrl}/api/rooms/${roomId}/leave`, {
+    const token = sessionStorage.getItem('accessToken');
+    const response = await fetch(`${this.baseUrl}/api/discussion-rooms/${roomId}/leave`, {
       method: 'DELETE',
       credentials: 'include',
+      headers: {
+        ...(token && { Authorization: `Bearer ${token}` }),
+      },
     });
     return response.json();
   }
@@ -217,9 +246,7 @@ export class DiscussionRoomAPI {
     // Real API call
     const response = await fetch(`${this.baseUrl}/api/proposals`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: getAuthHeaders(),
       credentials: 'include',
       body: JSON.stringify(payload),
     });
@@ -247,9 +274,7 @@ export class DiscussionRoomAPI {
     // Real API call
     const response = await fetch(`${this.baseUrl}/api/proposals/${proposalId}`, {
       method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: getAuthHeaders(),
       credentials: 'include',
       body: JSON.stringify(payload),
     });
@@ -276,8 +301,12 @@ export class DiscussionRoomAPI {
     }
 
     // Real API call
+    const token = sessionStorage.getItem('accessToken');
     const response = await fetch(`${this.baseUrl}/api/proposals/${proposalId}`, {
       credentials: 'include',
+      headers: {
+        ...(token && { Authorization: `Bearer ${token}` }),
+      },
     });
     return response.json();
   }

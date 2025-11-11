@@ -3,7 +3,8 @@ import { Title, Detail, TextInput } from "@krds-ui/core";
 import CategoryChips from "./components/CategoryChips";
 import FilterPanel from "./components/FilterPanel";
 import ForumCard from "./components/ForumCard";
-import mockItemsRaw from "./mockItems"; 
+import mockItemsRaw from "./mockItems";
+import { CreateRoomDialog } from './components/CreateRoomDialog';
 
 
 //타입 선언하기
@@ -45,6 +46,9 @@ const mockItems = mockItemsRaw as unknown as ForumItem[];
 
 /* 검색어 상태, 정렬 기준, 선택된 필터들 */
 export default function SolutionForumPage() {
+
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false); // 다이어그램 오픈 상태관리
+
   const [query, setQuery] = useState("");
   const [sort, setSort] = useState<SortKey>("latest");
   const [selected, setSelected] = useState<{
@@ -119,6 +123,16 @@ export default function SolutionForumPage() {
     return arr;
   }, [query, sort, selected]);
 
+  const handleCreateForum = () => {
+    setIsCreateDialogOpen(true);
+  };
+
+  const handleCreateSuccess = () => {
+    // TODO: Refresh room list
+    console.log('Room created successfully');
+  };
+
+
   return (
     <main className="mx-auto max-w-[1200px] px-4 py-8">
       <header className="mb-6">
@@ -141,6 +155,7 @@ export default function SolutionForumPage() {
             }}
             onToggle={(type, v) => toggle(type, v as Region & Status)}
             onReset={resetFilters}
+            onCreateForum={handleCreateForum}
           />
         </aside>
 
@@ -190,6 +205,12 @@ export default function SolutionForumPage() {
           </div>
         </section>
       </div>
+
+      <CreateRoomDialog
+        isOpen={isCreateDialogOpen}
+        onClose={() => setIsCreateDialogOpen(false)}
+        onSuccess={handleCreateSuccess}
+      />
     </main>
   );
 }

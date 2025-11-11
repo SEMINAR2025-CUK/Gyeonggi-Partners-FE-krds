@@ -3,9 +3,9 @@
 // API Configuration
 export const API_CONFIG = {
   // Toggle this to switch between mock and real API
-  USE_MOCK: true,
-  BASE_URL: 'http://localhost:8080',
-  WS_URL: 'http://localhost:8080/ws',
+  USE_MOCK: false,
+  BASE_URL: 'http://3.39.207.166:8080',
+  WS_URL: 'http://3.39.207.166:8080/gyeonggi_partners-chat',
 };
 
 // Mock Data Configuration

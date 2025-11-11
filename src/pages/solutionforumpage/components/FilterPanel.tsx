@@ -6,6 +6,7 @@ type Props = {
   selected: { regions: Set<string>; statuses: Set<string> };
   onToggle: (type: "region" | "status", value: string) => void; // 체크 클릭 시 부모에 토글 요청
   onReset: () => void;                             // 전체 선택 초기화
+  onCreateForum?: () => void;
 };
 
 export default function FilterPanel({
@@ -14,6 +15,7 @@ export default function FilterPanel({
   selected,
   onToggle,
   onReset,
+  onCreateForum,
 }: Props) {
   const Item = ({
     checked,
@@ -70,6 +72,15 @@ export default function FilterPanel({
 
       <Button className="mt-4 w-full" onClick={onReset}>
         필터 초기화
+      </Button>
+
+      {/* 새로 추가: 토의실 생성 버튼 */}
+      <Button
+        className="mt-3 w-full"
+        variant="primary"
+        onClick={onCreateForum}
+      >
+        토의실 생성하기
       </Button>
     </aside>
   );
