@@ -6,7 +6,7 @@ import { MainBanner } from './components/MainBanner'
 import { Header } from './components/Header'
 import SignupForm from './pages/SignUpForm'
 import SignInForm from './pages/SignInForm'
-import SolutionForumPage from './pages/SolutionForumPage'
+import SolutionForumPage from './pages/solutionforumpage/SolutionForumPage'
 
 export default function App() {
   return (
