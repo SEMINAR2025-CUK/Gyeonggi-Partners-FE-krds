@@ -1,6 +1,3 @@
-// src/pages/solutionforumpage/mockItems.ts
-// 타입 의존성 없게 순수 데이터만 export (페이지에서 타입 단언해서 사용)
-
 const mockItems = [
   {
     id: "1",
