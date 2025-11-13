@@ -33,8 +33,8 @@ export class DiscussionRoomAPI {
 
   // Get all discussion rooms
   async getAllRooms(
-    page: number = 0, 
-    size: number = 10, 
+    page: number = 1,
+    size: number = 10,
     region?: string
   ): Promise<ApiResponse<PaginatedResponse<DiscussionRoom>>> {
     if (API_CONFIG.USE_MOCK) {
@@ -44,7 +44,7 @@ export class DiscussionRoomAPI {
       if (region) {
         filteredRooms = filteredRooms.filter(r => r.region === region);
       }
-
+  
       return {
         code: 'SUCCESS',
         message: '논의방 조회에 성공했습니다',
@@ -55,28 +55,71 @@ export class DiscussionRoomAPI {
         },
       };
     }
-
-    // Real API call
-    const params = new URLSearchParams({
-      page: page.toString(),
-      size: size.toString(),
-      ...(region && { region }),
-    });
-
-    const token = sessionStorage.getItem('accessToken');
-    const response = await fetch(`${this.baseUrl}/api/discussion-rooms/retrieveTotal?${params}`, {
-      credentials: 'include',
-      headers: {
-        ...(token && { Authorization: `Bearer ${token}` }),
-      },
-    });
-    return response.json();
+  
+    // Real API call with error handling
+    try {
+      const params = new URLSearchParams({
+        page: page.toString(),
+        size: size.toString(),
+        ...(region && { region }),
+      });
+  
+      const token = sessionStorage.getItem('accessToken');
+      const response = await fetch(`${this.baseUrl}/api/discussion-rooms/retrieveTotal?${params}`, {
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token && { Authorization: `Bearer ${token}` }),
+        },
+      });
+  
+      // HTTP 에러 체크
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        
+        // 403 Forbidden 등의 에러 처리
+        throw new Error(
+          errorData.error || errorData.message || `HTTP ${response.status}: ${response.statusText}`
+        );
+      }
+  
+      const result = await response.json();
+  
+      // 실제 API 응답을 타입에 맞게 변환
+      if (result.code === 'SUCCESS' && result.data?.rooms) {
+        return {
+          code: result.code,
+          message: result.message,
+          data: {
+            content: result.data.rooms, // rooms -> content로 매핑
+            totalPages: result.data.totalPages,
+            totalElements: result.data.totalCount,
+          },
+        };
+      }
+  
+      return result;
+    } catch (error) {
+      console.error('Failed to fetch rooms:', error);
+      
+      // 에러를 ApiResponse 형식으로 반환
+      return {
+        code: 'ERROR',
+        message: error instanceof Error ? error.message : '논의방 조회에 실패했습니다',
+        data: {
+          content: [],
+          totalPages: 0,
+          totalElements: 0,
+        },
+      };
+    }
   }
 
   // Get user's participating rooms
   async getMyRooms(
-    page: number = 0,
-    size: number = 10
+    page: number = 1,
+    size: number = 10,
+    region?: string
   ): Promise<ApiResponse<PaginatedResponse<DiscussionRoom>>> {
     if (API_CONFIG.USE_MOCK) {
       await delay(MOCK_CONFIG.MESSAGE_DELAY);
@@ -93,20 +136,63 @@ export class DiscussionRoomAPI {
       };
     }
 
-    // Real API call
-    const params = new URLSearchParams({
-      page: page.toString(),
-      size: size.toString(),
-    });
-
-    const token = sessionStorage.getItem('accessToken');
-    const response = await fetch(`${this.baseUrl}/api/discussion-rooms/retrieveMyJoined?${params}`, {
-      credentials: 'include',
-      headers: {
-        ...(token && { Authorization: `Bearer ${token}` }),
-      },
-    });
-    return response.json();
+    // Real API call with error handling
+    try {
+      const params = new URLSearchParams({
+        page: page.toString(),
+        size: size.toString(),
+        ...(region && { region }),
+      });
+  
+      const token = sessionStorage.getItem('accessToken');
+      const response = await fetch(`${this.baseUrl}/api/discussion-rooms/retrieveMyJoined?${params}`, {
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token && { Authorization: `Bearer ${token}` }),
+        },
+      });
+  
+      // HTTP 에러 체크
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        
+        // 403 Forbidden 등의 에러 처리
+        throw new Error(
+          errorData.error || errorData.message || `HTTP ${response.status}: ${response.statusText}`
+        );
+      }
+  
+      const result = await response.json();
+  
+      // 실제 API 응답을 타입에 맞게 변환
+      if (result.code === 'SUCCESS' && result.data?.rooms) {
+        return {
+          code: result.code,
+          message: result.message,
+          data: {
+            content: result.data.rooms, // rooms -> content로 매핑
+            totalPages: result.data.totalPages,
+            totalElements: result.data.totalCount,
+          },
+        };
+      }
+  
+      return result;
+    } catch (error) {
+      console.error('Failed to fetch rooms:', error);
+      
+      // 에러를 ApiResponse 형식으로 반환
+      return {
+        code: 'ERROR',
+        message: error instanceof Error ? error.message : '논의방 조회에 실패했습니다',
+        data: {
+          content: [],
+          totalPages: 0,
+          totalElements: 0,
+        },
+      };
+    }
   }
 
   // Create a new room
