@@ -3,6 +3,7 @@ import { discussionRoomAPI } from '../services/api';
 import { webSocketService } from '../services/webSocket';
 import { RoomDetails, ChatMessage } from '../types/discussion';
 // import { MOCK_CONFIG } from '../config/constants';
+import { useAuth } from './useAuth';
 
 export const useDiscussionRoom = (roomId: number | null) => {
   const [roomDetails, setRoomDetails] = useState<RoomDetails | null>(null);
@@ -11,6 +12,7 @@ export const useDiscussionRoom = (roomId: number | null) => {
   const [error, setError] = useState<string | null>(null);
   const [isWebSocketConnected, setIsWebSocketConnected] = useState(false);
   const isInitialLoad = useRef(true);
+  const { user } = useAuth();
 
   // Load room details
   const loadRoomDetails = useCallback(async () => {
@@ -27,8 +29,11 @@ export const useDiscussionRoom = (roomId: number | null) => {
       const response = await discussionRoomAPI.getRoomDetails(roomId);
 
       if (response.code === 'SUCCESS') {
-        setMessages(response.data.messages);
-        isInitialLoad.current = false; // 초기 로드시에만 API에서 받은 메시지 사용
+        setRoomDetails(response.data);
+        if (isInitialLoad.current) {
+          setMessages(response.data.messages);
+          isInitialLoad.current = false; // 초기 로드시에만 API에서 받은 메시지 사용
+        }
       } else {
         setError(response.message);
       }
@@ -76,15 +81,10 @@ export const useDiscussionRoom = (roomId: number | null) => {
 
   // Send a message - 실제 사용자 닉네임 사용
   const sendMessage = useCallback((content: string) => {
-    if (!content.trim() || !roomDetails) return;
+    if (!content.trim() || !user) return;
 
-    // roomDetails에서 현재 사용자의 닉네임 찾기
-    // 또는 sessionStorage에서 사용자 정보 가져오기
-    const userInfo = sessionStorage.getItem('userInfo');
-    const nickname = userInfo ? JSON.parse(userInfo).nickname : '익명';
-
-    webSocketService.sendMessage(content, nickname);
-  }, [roomDetails]);
+    webSocketService.sendMessage(content, user.nickname);
+  }, [user]);
 
   // Leave room
   const leaveRoom = useCallback(async () => {
