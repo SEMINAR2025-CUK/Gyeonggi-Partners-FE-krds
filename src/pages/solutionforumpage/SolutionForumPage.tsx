@@ -184,6 +184,18 @@ export default function SolutionForumPage() {
   };
 
 
+  // 채팅방이 열려있으면 채팅방만 렌더링
+  if (isChatModalOpen) {
+    return (
+      <GroupChatRoom
+        selectedRoom={selectedRoom}
+        isModalOpen={isChatModalOpen}
+        onClose={handleCloseChatModal}
+      />
+    );
+  }
+
+  // 기본 리스트 화면
   return (
     <main className="mx-auto max-w-[1200px] px-4 py-8">
       <header className="mb-6">
@@ -297,13 +309,6 @@ export default function SolutionForumPage() {
         isOpen={isCreateDialogOpen}
         onClose={() => setIsCreateDialogOpen(false)}
         onSuccess={handleCreateSuccess}
-      />
-
-      {/* Group Chat Room Modal */}
-      <GroupChatRoom
-        selectedRoom={selectedRoom}
-        isModalOpen={isChatModalOpen}
-        onClose={handleCloseChatModal}
       />
     </main>
   );

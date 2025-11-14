@@ -1,4 +1,5 @@
-import { useState } from 'react';
+// 일단 논의방에 참여하는 중까지는 떴다 스발것!!!
+import { useState, useEffect } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -26,29 +27,45 @@ interface GroupChatRoomProps {
 export const GroupChatRoom = ({ selectedRoom, isModalOpen, onClose }: GroupChatRoomProps) => {
   const [isInRoom, setIsInRoom] = useState(false);
   const [currentRoomId, setCurrentRoomId] = useState<number | null>(null);
-  const { roomDetails, messages, isLoading, sendMessage, leaveRoom } = useDiscussionRoom(currentRoomId);
+  const { roomDetails, messages, isLoading, error, isWebSocketConnected, sendMessage, leaveRoom } = useDiscussionRoom(currentRoomId);
   const [inputMessage, setInputMessage] = useState('');
   const [isEditorOpen, setIsEditorOpen] = useState(false);
   const [isViewerOpen, setIsViewerOpen] = useState(false);
+  const [isJoining, setIsJoining] = useState(false);
 
   // Handle join room
   const handleJoinRoom = async () => {
     if (!selectedRoom) return;
 
+    setIsJoining(true);
     try {
       const response = await discussionRoomAPI.joinRoom(selectedRoom.roomId);
-      
-      if (response.code === 'SUCCESS') {
+
+      console.log('Join room response:', response);
+
+      // SUCCESS 또는 이미 참여중인 경우
+      if (response.code === 'SUCCESS' || response.message?.includes('이미 참여')) {
         setCurrentRoomId(selectedRoom.roomId);
         setIsInRoom(true);
+        // isJoining은 roomDetails 로드 후 false로 변경
       } else {
-        alert(response.message);
+        alert(response.message || '논의방 참여에 실패했습니다.');
+        setIsJoining(false);
       }
     } catch (error) {
       console.error('Failed to join room:', error);
       alert('논의방 참여에 실패했습니다.');
+      setIsJoining(false);
     }
   };
+
+  // roomDetails가 로드되면 isJoining을 false로 변경
+  useEffect(() => {
+    if (isInRoom && roomDetails) {
+      console.log('Room details loaded:', roomDetails);
+      setIsJoining(false);
+    }
+  }, [isInRoom, roomDetails]);
 
   // Handle send message
   const handleSendMessage = (textContent: string) => {
@@ -74,8 +91,18 @@ export const GroupChatRoom = ({ selectedRoom, isModalOpen, onClose }: GroupChatR
   const handleBack = () => {
     setIsInRoom(false);
     setCurrentRoomId(null);
+    setIsJoining(false);
     onClose();
   };
+
+  // Reset state when modal is closed
+  useEffect(() => {
+    if (!isModalOpen) {
+      setIsInRoom(false);
+      setCurrentRoomId(null);
+      setIsJoining(false);
+    }
+  }, [isModalOpen]);
 
   // Handle save proposal
   const handleSaveProposal = async (payload: ProposalPayload) => {
@@ -103,6 +130,7 @@ export const GroupChatRoom = ({ selectedRoom, isModalOpen, onClose }: GroupChatR
         isOpen={isModalOpen}
         onClose={onClose}
         onJoin={handleJoinRoom}
+        isJoining={isJoining}
       />
     );
   }
@@ -134,13 +162,30 @@ export const GroupChatRoom = ({ selectedRoom, isModalOpen, onClose }: GroupChatR
       );
     }
 
-    // Loading state
-    if (isLoading) {
+    // Loading state - WebSocket 연결 상태도 고려
+    if (isLoading || isJoining) {
       return (
         <div className="w-full h-screen flex items-center justify-center">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-            <p className="text-gray-600">논의방을 불러오는 중...</p>
+            <p className="text-gray-600">
+              {isJoining ? '논의방에 참여하는 중...' : '논의방을 불러오는 중...'}
+            </p>
+            {isInRoom && !isWebSocketConnected && (
+              <p className="text-sm text-gray-500 mt-2">실시간 채팅 연결 중...</p>
+            )}
+          </div>
+        </div>
+      );
+    }
+
+    // Error state
+    if (error) {
+      return (
+        <div className="w-full h-screen flex items-center justify-center">
+          <div className="text-center">
+            <p className="text-red-600 mb-4">{error}</p>
+            <Button onClick={handleBack} children="뒤로 가기" />
           </div>
         </div>
       );

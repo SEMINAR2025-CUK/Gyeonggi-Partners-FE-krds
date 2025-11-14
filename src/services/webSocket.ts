@@ -16,9 +16,20 @@ export class WebSocketService {
   constructor() {
     if (!API_CONFIG.USE_MOCK) {
       this.client = new Client({
-        webSocketFactory: () => new SockJS(API_CONFIG.WS_URL),
+        webSocketFactory: () => {
+          const token = sessionStorage.getItem('accessToken');
+          const wsUrl = token 
+            ? `${API_CONFIG.WS_URL}?token=${token}`
+            : API_CONFIG.WS_URL;
+
+          return new SockJS(wsUrl);
+        },
         debug: (str) => {
           console.log('STOMP Debug:', str);
+        },
+
+        connectHeaders: {
+          Authorization: `Bearer ${sessionStorage.getItem('accessToken')}`,
         },
         reconnectDelay: 5000,
         heartbeatIncoming: 4000,
@@ -45,6 +56,11 @@ export class WebSocketService {
         reject(new Error('WebSocket client not initialized'));
         return;
       }
+
+      // 재연결 시에도 최신 토큰 사용
+      this.client.connectHeaders = {
+        Authorization: `Bearer ${sessionStorage.getItem('accessToken')}`,
+      };
 
       this.client.onConnect = () => {
         console.log('WebSocket connected');
@@ -110,6 +126,9 @@ export class WebSocketService {
           content,
           senderNickname,
         }),
+        headers: {
+          Authorization: `Bearer ${sessionStorage.getItem('accessToken')}`,
+        },
       });
     }
   }
@@ -131,27 +150,14 @@ export class WebSocketService {
 
   // Mock message simulation (for testing without backend)
   private startMockMessages(): void {
-    // Simulate receiving a message every 30 seconds
     this.mockInterval = setInterval(() => {
-      const mockMessages = [
-        '안녕하세요!',
-        '좋은 의견이네요.',
-        '이 부분은 어떻게 생각하시나요?',
-        '제안서 작성이 필요할 것 같습니다.',
-      ];
-
-      const randomMessage = mockMessages[Math.floor(Math.random() * mockMessages.length)];
-      const randomUser = `사용자${Math.floor(Math.random() * 100)}`;
-
-      const message: ChatMessage = {
+      const mockMessage: ChatMessage = {
         messageId: this.mockMessageCounter++,
-        senderNickname: randomUser,
-        content: randomMessage,
+        senderNickname: 'AI Bot',
+        content: `자동 생성된 메시지 ${new Date().toLocaleTimeString()}`,
         sentAt: new Date().toISOString(),
-        userId: Math.floor(Math.random() * 1000),
       };
-
-      this.notifyHandlers(message);
+      this.notifyHandlers(mockMessage);
     }, 30000);
   }
 

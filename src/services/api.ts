@@ -296,7 +296,7 @@ export class DiscussionRoomAPI {
       };
     }
 
-    // Real API call
+    // Real API call // !!!!!!!!!!!!!!!!!!
     const token = sessionStorage.getItem('accessToken');
     const response = await fetch(`${this.baseUrl}/api/discussion-rooms/${roomId}/leave`, {
       method: 'DELETE',
@@ -395,6 +395,63 @@ export class DiscussionRoomAPI {
       },
     });
     return response.json();
+  }
+
+  // Get chat messages for a room
+  async getChatMessages(
+    roomId: number,
+    cursor?: number,
+    size: number = 30
+  ): Promise<ApiResponse<{ messages: any[]; nextCursor?: number; hasNext: boolean }>> {
+    if (API_CONFIG.USE_MOCK) {
+      await delay(MOCK_CONFIG.MESSAGE_DELAY);
+      
+      return {
+        code: 'SUCCESS',
+        message: '메시지 조회에 성공했습니다',
+        data: {
+          messages: [],
+          hasNext: false,
+        },
+      };
+    }
+
+    // Real API call
+    try {
+      const params = new URLSearchParams({
+        size: size.toString(),
+        ...(cursor && { cursor: cursor.toString() }),
+      });
+
+      const token = sessionStorage.getItem('accessToken');
+      const response = await fetch(`${this.baseUrl}/api/messages/rooms/${roomId}?${params}`, {
+        credentials: 'include',
+        headers: {
+          ...(token && { Authorization: `Bearer ${token}` }),
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
+      const result = await response.json();
+      return {
+        code: 'SUCCESS',
+        message: '메시지 조회에 성공했습니다',
+        data: result,
+      };
+    } catch (error) {
+      console.error('Failed to fetch messages:', error);
+      return {
+        code: 'ERROR',
+        message: error instanceof Error ? error.message : '메시지 조회에 실패했습니다',
+        data: {
+          messages: [],
+          hasNext: false,
+        },
+      };
+    }
   }
 }
 

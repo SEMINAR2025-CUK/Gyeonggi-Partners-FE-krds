@@ -17,11 +17,14 @@ export default function Temp() {
     setIsLoading(true);
     try {
       const response = await discussionRoomAPI.getAllRooms();
-      if (response.code === 'SUCCESS') {
+      if (response.code === 'SUCCESS' && response.data?.content) {
         setRooms(response.data.content);
+      } else {
+        setRooms([]);
       }
     } catch (error) {
       console.error('Failed to load rooms:', error);
+      setRooms([]); // Set empty array on error
     } finally {
       setIsLoading(false);
     }
@@ -72,13 +75,13 @@ export default function Temp() {
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
             <p className="text-gray-600">논의방을 불러오는 중...</p>
           </div>
-        ) : rooms.length === 0 ? (
+        ) : !rooms || rooms.length === 0 ? (
           <div className="text-center py-12">
             <p className="text-gray-600">현재 개설된 논의방이 없습니다.</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {rooms.map((room) => (
+            {rooms?.map((room) => (
               <DiscussionRoomCard
                 key={room.roomId}
                 room={room}

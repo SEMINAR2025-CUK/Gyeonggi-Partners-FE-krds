@@ -17,9 +17,10 @@ import {
     isOpen: boolean;
     onClose: () => void;
     onJoin: () => void;
+    isJoining?: boolean;
   }
-  
-  export const JoinRoomModal = ({ room, isOpen, onClose, onJoin }: JoinRoomModalProps) => {
+
+  export const JoinRoomModal = ({ room, isOpen, onClose, onJoin, isJoining = false }: JoinRoomModalProps) => {
     if (!room) return null;
   
     return (
@@ -58,11 +59,11 @@ import {
           </div>
           
           <DialogFooter>
-            <Button variant="secondary" onClick={onClose} size="small">
+            <Button variant="secondary" onClick={onClose} size="small" disabled={isJoining}>
               취소
             </Button>
-            <Button variant="primary" onClick={onJoin} size="small">
-              논의방 참여하기
+            <Button variant="primary" onClick={onJoin} size="small" disabled={isJoining}>
+              {isJoining ? '참여 중...' : '논의방 참여하기'}
             </Button>
           </DialogFooter>
         </DialogContent>
