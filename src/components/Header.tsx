@@ -1,11 +1,12 @@
 import { useEffect, useRef, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Search, Menu, User, LogOut } from 'lucide-react'
 import { Button, TextInput, Link } from '@krds-ui/core'
 
 interface HeaderProps {
   isLoggedIn?: boolean
-  onLoginClick?: () => void
-  onLogoutClick?: () => void
+  onLoginClick?: () => void      // (선택) 로그인 눌렀을 때 추가 로직
+  onLogoutClick?: () => void     // (선택) 로그아웃 눌렀을 때 추가 로직 (토큰 삭제 등)
   onNavigate?: (page: string) => void
   currentPage?: string
 }
@@ -14,7 +15,6 @@ export function Header({
   isLoggedIn = false,
   onLoginClick,
   onLogoutClick,
-  onNavigate,
   currentPage = 'main',
 }: HeaderProps) {
   const navItems = [
@@ -28,6 +28,20 @@ export function Header({
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const mobileMenuRef = useRef<HTMLDivElement | null>(null)
+
+  const navigate = useNavigate()
+
+  // 🔹 로그인 버튼 클릭 → /signin 으로 라우팅
+  const handleLoginClick = () => {
+    onLoginClick?.() // 필요하면 상위에서 추가 작업(로그 이벤트 등)
+    navigate('/signin')
+  }
+
+  // 🔹 로그아웃 버튼 클릭 → 상위 로직 실행 후 / 로 라우팅
+  const handleLogoutClick = () => {
+    onLogoutClick?.() // 토큰 삭제, 전역 상태 초기화 등
+    navigate('/') // 홈으로 이동
+  }
 
   useEffect(() => {
     const handleOutside = (e: MouseEvent) => {
@@ -53,7 +67,37 @@ export function Header({
             </div>
 
             <div className="flex items-center space-x-4">
-              {
+              {isLoggedIn ? (
+                // 🔹 로그인 상태: 로그아웃 + 사이트맵
+                <>
+                  <Link
+                    size="s"
+                    weight="regular"
+                    color="gray-60"
+                    href="/"
+                    title="로그아웃"
+                    className="no-underline inline-flex items-center h-6 leading-none cursor-pointer hover:text-primary-50"
+                    onClick={(e) => {
+                      e.preventDefault()
+                      handleLogoutClick()
+                    }}
+                  >
+                    로그아웃
+                  </Link>
+                  <span className="self-center">•</span>
+                  <Link
+                    size="s"
+                    weight="regular"
+                    color="gray-60"
+                    href="/sitemap"
+                    title="사이트맵"
+                    className="no-underline inline-flex items-center h-6 leading-none cursor-pointer hover:text-primary-50"
+                  >
+                    사이트맵
+                  </Link>
+                </>
+              ) : (
+                // 🔹 비로그인 상태: 로그인 • 회원가입 • 사이트맵
                 <>
                   <Link
                     size="s"
@@ -76,19 +120,19 @@ export function Header({
                   >
                     회원가입
                   </Link>
+                  <span className="self-center">•</span>
+                  <Link
+                    size="s"
+                    weight="regular"
+                    color="gray-60"
+                    href="/sitemap"
+                    title="사이트맵"
+                    className="no-underline inline-flex items-center h-6 leading-none cursor-pointer hover:text-primary-50"
+                  >
+                    사이트맵
+                  </Link>
                 </>
-              }
-              <span className="self-center">•</span>
-              <Link
-                size="s"
-                weight="regular"
-                color="gray-60"
-                href="/sitemap"
-                title="사이트맵"
-                className="no-underline inline-flex items-center h-6 leading-none cursor-pointer hover:text-primary-50"
-              >
-                사이트맵
-              </Link>
+              )}
             </div>
           </div>
         </div>
@@ -101,9 +145,9 @@ export function Header({
             tablet:flex-row tablet:items-center tablet:justify-between tablet:h-16 tablet:py-0
           "
         >
-          {/* Logo */}
-          <button
-            onClick={() => onNavigate?.('main')}
+          {/* 로고 클릭 시 홈 라우팅 */}
+          <Link
+            href="/"
             className="mobile:inline-flex mobile:w-auto flex items-center space-x-4 hover:opacity-80 transition-opacity mobile:pr-16 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-40 rounded-lg"
           >
             <div className="w-9 h-9 bg-primary-50 rounded-md flex items-center justify-center">
@@ -117,7 +161,7 @@ export function Header({
                 Gyeonggi Partners
               </p>
             </div>
-          </button>
+          </Link>
 
           {/* Search */}
           <div className="mobile:w-full tablet:flex-1 tablet:max-w-lg tablet:mx-8 mobile:order-3 tablet:order-none">
@@ -163,7 +207,7 @@ export function Header({
                 <Button
                   variant="text"
                   size="small"
-                  onClick={onLogoutClick}
+                  onClick={handleLogoutClick}
                   className="
                     px-2 py-0
                     [&>label]:flex [&>label]:items-center [&>label]:gap-1
@@ -179,7 +223,7 @@ export function Header({
               <Button
                 variant="text"
                 size="small"
-                onClick={onLoginClick}
+                onClick={handleLoginClick}
                 className="
                   px-2 py-0
                   [&>label]:flex [&>label]:items-center [&>label]:gap-1
@@ -236,7 +280,7 @@ export function Header({
                   size="s"
                   weight="regular"
                   color="gray-70"
-                  href="/login"
+                  href="/signin"
                   title="로그인"
                   className="block w-full px-3 py-2 no-underline hover:bg-gray-10"
                 >
